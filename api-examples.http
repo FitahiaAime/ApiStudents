@@ -1,0 +1,45 @@
+### Health check
+GET http://localhost:3000/health
+
+### Lister tous les étudiants
+GET http://localhost:3000/etudiants
+
+### Lire un étudiant précis
+GET http://localhost:3000/etudiants/1
+
+### Créer un étudiant
+POST http://localhost:3000/etudiants
+Content-Type: application/json
+
+{
+  "firstName": "Jean",
+  "lastName": "Rakoto",
+  "email": "jean.rakoto@example.com",
+  "phone": "0341234567",
+  "dateOfBirth": "2000-05-12",
+  "address": "Antananarivo, Madagascar"
+}
+
+### Modifier un étudiant (complet)
+PUT http://localhost:3000/etudiants/1
+Content-Type: application/json
+
+{
+  "firstName": "Jean",
+  "lastName": "Rakoto",
+  "email": "jean.rakoto@example.com",
+  "phone": "0341112233",
+  "dateOfBirth": "2000-05-12",
+  "address": "Antananarivo, Madagascar"
+}
+
+### Modifier un étudiant (partiel)
+PATCH http://localhost:3000/etudiants/1
+Content-Type: application/json
+
+{
+  "phone": "0341112233"
+}
+
+### Supprimer un étudiant
+DELETE http://localhost:3000/etudiants/1
