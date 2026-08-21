@@ -1,6 +1,7 @@
 import { Application, Request, Response } from 'express';
 import { StudentService } from '../services/StudentService';
 import { CreateStudentDTO, UpdateStudentDTO } from '../models/Student';
+import { authenticate, authorize } from '../middlewares/auth';
 
 export class StudentController {
   private studentService: StudentService;
@@ -11,12 +12,34 @@ export class StudentController {
   }
 
   private registerRoutes(app: Application): void {
+    // Routes publiques (sans JWT)
     app.get('/etudiants', this.getAll.bind(this));
     app.get('/etudiants/:id', this.getById.bind(this));
-    app.post('/etudiants', this.create.bind(this));
-    app.put('/etudiants/:id', this.update.bind(this));
-    app.patch('/etudiants/:id', this.update.bind(this));
-    app.delete('/etudiants/:id', this.remove.bind(this));
+    
+    // Routes protégées (avec JWT)
+    app.post('/etudiants', 
+      authenticate, 
+      authorize(['admin', 'professor']), 
+      this.create.bind(this)
+    );
+    
+    app.put('/etudiants/:id', 
+      authenticate, 
+      authorize(['admin', 'professor']), 
+      this.update.bind(this)
+    );
+    
+    app.patch('/etudiants/:id', 
+      authenticate, 
+      authorize(['admin', 'professor']), 
+      this.update.bind(this)
+    );
+    
+    app.delete('/etudiants/:id', 
+      authenticate, 
+      authorize(['admin']), 
+      this.remove.bind(this)
+    );
   }
 
   private async getAll(req: Request, res: Response): Promise<void> {
@@ -40,6 +63,7 @@ export class StudentController {
 
   private async create(req: Request, res: Response): Promise<void> {
     try {
+      console.log('📝 Créé par:', req.user?.email, 'Rôle:', req.user?.role);
       const data: CreateStudentDTO = req.body;
       const student = await this.studentService.createStudent(data);
       res.status(201).json(student);
@@ -50,6 +74,7 @@ export class StudentController {
 
   private async update(req: Request, res: Response): Promise<void> {
     try {
+      console.log('✏️ Modifié par:', req.user?.email, 'Rôle:', req.user?.role);
       const id = Number(req.params.id);
       const data: UpdateStudentDTO = req.body;
       const student = await this.studentService.updateStudent(id, data);
@@ -61,6 +86,7 @@ export class StudentController {
 
   private async remove(req: Request, res: Response): Promise<void> {
     try {
+      console.log('🗑️ Supprimé par:', req.user?.email, 'Rôle:', req.user?.role);
       const id = Number(req.params.id);
       await this.studentService.deleteStudent(id);
       res.status(204).send();
@@ -69,7 +95,6 @@ export class StudentController {
     }
   }
 
-  // Gestion centralisée des erreurs
   private handleError(res: Response, error: unknown): void {
     const message = error instanceof Error ? error.message : 'Unknown error';
 

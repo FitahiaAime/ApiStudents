@@ -1,13 +1,8 @@
-import jwt from 'jsonwebtoken';
+import jwt, { SignOptions } from 'jsonwebtoken';
 import dotenv from 'dotenv';
+import { JwtPayload } from '../interfaces/Jwt.interface';
 
 dotenv.config();
-
-export interface JwtPayload {
-  id: number;
-  email: string;
-  role: string;
-}
 
 export class JwtService {
   private secret: string;
@@ -19,7 +14,8 @@ export class JwtService {
   }
 
   generateToken(payload: JwtPayload): string {
-    return jwt.sign(payload, this.secret, { expiresIn: this.expiresIn });
+    const options: SignOptions = { expiresIn: this.expiresIn as SignOptions['expiresIn'] };
+    return jwt.sign(payload, this.secret, options);
   }
 
   verifyToken(token: string): JwtPayload {
